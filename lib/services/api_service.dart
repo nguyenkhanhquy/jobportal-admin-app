@@ -47,7 +47,6 @@ class ApiService {
     }
   }
 
-  //Hàm đổi mật khẩu
 // Hàm đổi mật khẩu
   static Future<Map<String, dynamic>> changePassword({
     required String token,
@@ -72,6 +71,25 @@ class ApiService {
       return jsonDecode(response.body);
     } else {
       throw Exception('Failed to change password: ${response.body}');
+    }
+  }
+
+  // Hàm tônổng hợp thông tin
+  static Future<Map<String, dynamic>> getOverview(
+      {required String token}) async {
+    final url = Uri.parse('$baseUrl/dashboard/overview');
+    final response = await http.get(
+      url,
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer $token", // Đưa token vào header để xác thực
+      },
+    );
+
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body); // Trả về thông tin người dùng
+    } else {
+      throw Exception('Failed to load user data');
     }
   }
 }
