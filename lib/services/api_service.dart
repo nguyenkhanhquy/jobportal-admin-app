@@ -92,4 +92,23 @@ class ApiService {
       throw Exception('Failed to load user data');
     }
   }
+
+  // Hàm tônổng hợp thông tin
+  static Future<Map<String, dynamic>> getJobSeekers(
+      {required String token}) async {
+    final url = Uri.parse('$baseUrl/job-seeker');
+    final response = await http.get(
+      url,
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer $token", // Đưa token vào header để xác thực
+      },
+    );
+
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body); // Trả về thông tin người dùng
+    } else {
+      throw Exception('Failed to load job seekers data');
+    }
+  }
 }

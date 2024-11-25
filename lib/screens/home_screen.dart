@@ -4,6 +4,7 @@ import '../services/api_service.dart';
 import 'login_screen.dart';
 import 'account_screen.dart';
 import 'change_password_screen.dart';
+import 'jobseeker_screen.dart';
 import '../widgets/common_snackbar.dart';
 
 var overviewData;
@@ -18,7 +19,9 @@ class _HomeScreenState extends State<HomeScreen> {
   bool isLoading = true;
   Future<void> logout() async {
     final token = await storage.read(key: "token");
-
+    setState(() {
+      isLoading = true; // Hiển thị CircularProgressIndicator trước khi gọi API
+    });
     final response = await ApiService.logout(token: token);
 
     if (response['success']) {
@@ -32,13 +35,21 @@ class _HomeScreenState extends State<HomeScreen> {
     } else {
       showCustomSnackbar(context, response['message'], Colors.red);
     }
+    setState(() {
+      isLoading =
+          false; // Cập nhật lại trạng thái sau khi API đã trả về hoặc lỗi
+    });
   }
 
-// Hàm gọi API để lấy thông tin người dùng
+  //Hàm gọi API để lấy thông tin người dùng
   Future<void> fetchUserInfo() async {
     final token = await storage.read(key: 'token'); // Lấy token từ storage
 
     if (token != null) {
+      setState(() {
+        isLoading =
+            true; // Hiển thị CircularProgressIndicator trước khi gọi API
+      });
       try {
         // Gọi API lấy thông tin người dùng
         final response = await ApiService.getUserInfo(token: token);
@@ -54,6 +65,49 @@ class _HomeScreenState extends State<HomeScreen> {
       } catch (e) {
         // Xử lý lỗi nếu có
         print('Error fetching user info: $e');
+      } finally {
+        setState(() {
+          isLoading =
+              false; // Cập nhật lại trạng thái sau khi API đã trả về hoặc lỗi
+        });
+      }
+    } else {
+      // Nếu không có token
+      print('Token not found');
+    }
+  }
+
+  // Hàm gọi API để lấy thông tin người dùng
+  Future<void> fetchJobSeekersInfo() async {
+    final token = await storage.read(key: 'token'); // Lấy token từ storage
+
+    if (token != null) {
+      setState(() {
+        isLoading =
+            true; // Hiển thị CircularProgressIndicator trước khi gọi API
+      });
+
+      try {
+        // Gọi API lấy thông tin người dùng
+        final response = await ApiService.getJobSeekers(token: token);
+
+        // Nếu thành công, chuyển sang trang JobseekerScreen
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) =>
+                JobseekerScreen(jobseekerData: response['result']),
+          ),
+        );
+      } catch (e) {
+        // Xử lý lỗi nếu có
+        print('Error fetching job seekers info: $e');
+        // Bạn có thể hiển thị thông báo lỗi tại đây nếu cần
+      } finally {
+        setState(() {
+          isLoading =
+              false; // Cập nhật lại trạng thái sau khi API đã trả về hoặc lỗi
+        });
       }
     } else {
       // Nếu không có token
@@ -97,7 +151,9 @@ class _HomeScreenState extends State<HomeScreen> {
     if (isLoading) {
       return Scaffold(
         body: Center(
-            child: CircularProgressIndicator()), // Hiển thị spinner khi chờ
+            child: CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation<Color>(
+                    Colors.green))), // Hiển thị spinner khi chờ
       );
     }
     return Scaffold(
@@ -316,9 +372,7 @@ class _HomeScreenState extends State<HomeScreen> {
               mainAxisAlignment: MainAxisAlignment.center, // Căn giữa hàng
               children: [
                 ElevatedButton.icon(
-                  onPressed: () {
-                    print("Ứng viên button pressed");
-                  },
+                  onPressed: (fetchJobSeekersInfo),
                   icon: Icon(Icons.account_box_outlined), // Biểu tượng bên trái
                   label: Text("Ứng viên"),
                   style: ElevatedButton.styleFrom(
