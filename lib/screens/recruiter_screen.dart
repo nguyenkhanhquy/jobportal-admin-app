@@ -3,27 +3,27 @@ import 'dart:convert';
 import '../services/api_service.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
-class JobSeekerScreen extends StatefulWidget {
-  final List<dynamic> jobseekerData;
+class RecruiterScreen extends StatefulWidget {
+  final List<dynamic> recruiterData;
 
-  JobSeekerScreen({required this.jobseekerData});
+  RecruiterScreen({required this.recruiterData});
 
   @override
-  _JobSeekerScreenState createState() => _JobSeekerScreenState();
+  _RecruiterScreenState createState() => _RecruiterScreenState();
 }
 
-class _JobSeekerScreenState extends State<JobSeekerScreen> {
-  late List<dynamic> jobseekerData;
+class _RecruiterScreenState extends State<RecruiterScreen> {
+  late List<dynamic> recruiterData;
 
   @override
   void initState() {
     super.initState();
-    jobseekerData = widget.jobseekerData;
+    recruiterData = widget.recruiterData;
   }
 
   Future<void> toggleLockStatus({
     required BuildContext context,
-    required Map<String, dynamic> jobseeker,
+    required Map<String, dynamic> recruiter,
     required Function setDialogState,
   }) async {
     final storage = FlutterSecureStorage();
@@ -36,17 +36,17 @@ class _JobSeekerScreenState extends State<JobSeekerScreen> {
     }
 
     try {
-      setDialogState(() => jobseeker['isLoading'] = true);
+      setDialogState(() => recruiter['isLoading'] = true);
       final response =
-          await ApiService.lockChange(id: jobseeker['id'], token: token);
+          await ApiService.lockChange(id: recruiter['id'], token: token);
 
       if (response['success'] == true) {
         setState(() {
-          jobseeker['locked'] = !jobseeker['locked'];
+          recruiter['locked'] = !recruiter['locked'];
         });
         _showSnackBar(
           context,
-          jobseeker['locked'] ? 'Khóa thành công!' : 'Mở khóa thành công!',
+          recruiter['locked'] ? 'Khóa thành công!' : 'Mở khóa thành công!',
           isError: false,
         );
         Navigator.of(context).pop(); // Đóng dialog nếu cần
@@ -56,7 +56,7 @@ class _JobSeekerScreenState extends State<JobSeekerScreen> {
     } catch (error) {
       _showSnackBar(context, 'Lỗi: ${error.toString()}', isError: true);
     } finally {
-      setDialogState(() => jobseeker['isLoading'] = false);
+      setDialogState(() => recruiter['isLoading'] = false);
     }
   }
 
@@ -71,7 +71,7 @@ class _JobSeekerScreenState extends State<JobSeekerScreen> {
   }
 
   void _showDetailsDialog(
-      BuildContext context, Map<String, dynamic> jobseeker) {
+      BuildContext context, Map<String, dynamic> recruiter) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -80,9 +80,9 @@ class _JobSeekerScreenState extends State<JobSeekerScreen> {
             return AlertDialog(
               title: Text("Thông tin chi tiết"),
               content: SingleChildScrollView(
-                child: _buildDetailsContent(jobseeker),
+                child: _buildDetailsContent(recruiter),
               ),
-              actions: _buildDialogActions(context, jobseeker, setStateDialog),
+              actions: _buildDialogActions(context, recruiter, setStateDialog),
             );
           },
         );
@@ -145,42 +145,65 @@ class _JobSeekerScreenState extends State<JobSeekerScreen> {
     );
   }
 
-  Widget _buildDetailsContent(Map<String, dynamic> jobseeker) {
+  Widget _buildDetailsContent(Map<String, dynamic> recruiter) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        Center(
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(12),
+            child: Image.network(
+              recruiter['company']['logo'] ?? '',
+              width: 80,
+              height: 80,
+              fit: BoxFit.cover,
+            ),
+          ),
+        ),
+        SizedBox(height: 8),
+        _buildSectionTitle('THÔNG TIN CÔNG TY'),
         SizedBox(height: 8),
         _buildRichTextWithSpacing(
-          'ID: ',
-          jobseeker['id'],
-        ),
-        _buildRichTextWithSpacing(
-          'Email: ',
-          jobseeker['email'],
-        ),
-        _buildRichTextWithSpacing('Họ và tên: ',
-            utf8.decode(jobseeker['fullName'].toString().runes.toList())),
-        _buildRichTextWithSpacing(
-            'Ngày đăng ký: ', jobseeker['registrationDate']),
-        _buildRichTextWithSpacing(
-          'Ngày sinh: ',
-          jobseeker['registrationDate'],
-        ),
-        _buildRichTextWithSpacing(
-          'Số điện thoại: ',
-          jobseeker['phone'],
-        ),
-        _buildRichTextWithSpacing('Địa chỉ: ',
-            utf8.decode(jobseeker['address'].toString().runes.toList())),
-        _buildRichTextWithSpacing('Kinh nghiệm: ',
-            utf8.decode(jobseeker['workExperience'].toString().runes.toList())),
-        _buildRichTextWithSpacing(
-          'Trạng thái tài khoản: ',
-          jobseeker['locked'] != null
-              ? (jobseeker['locked'] ? 'Đã bị khóa' : 'Bình thường')
+          'Công ty',
+          recruiter['company']['name'] != null
+              ? utf8.decode(
+                  recruiter['company']['name'].toString().runes.toList())
               : 'Chưa cập nhật',
-          statusColor: jobseeker['locked'] != null
-              ? (jobseeker['locked'] ? Colors.red : Colors.green)
+        ),
+        _buildRichTextWithSpacing(
+          'Website',
+          recruiter['company']['website'] != null
+              ? utf8.decode(
+                  recruiter['company']['website'].toString().runes.toList())
+              : 'Chưa cập nhật',
+        ),
+        _buildRichTextWithSpacing(
+          'Địa chỉ',
+          recruiter['company']['address'] != null
+              ? utf8.decode(
+                  recruiter['company']['address'].toString().runes.toList())
+              : 'Chưa cập nhật',
+        ),
+        _buildRichTextWithSpacing('Email', recruiter['email']),
+        _buildSectionTitle('NGƯỜI ĐẠI DIỆN'),
+        SizedBox(height: 8),
+        _buildRichTextWithSpacing(
+          'Họ và tên',
+          utf8.decode(recruiter['name'].toString().runes.toList()),
+        ),
+        _buildRichTextWithSpacing(
+          'Chức vụ',
+          utf8.decode(recruiter['position'].toString().runes.toList()),
+        ),
+        _buildRichTextWithSpacing('Email', recruiter['recruiterEmail']),
+        _buildRichTextWithSpacing('Số điện thoại', recruiter['phone']),
+        _buildRichTextWithSpacing(
+          'Trạng thái hoạt động',
+          recruiter['locked'] != null
+              ? (recruiter['locked'] ? 'Đã bị khóa' : 'Bình thường')
+              : 'Chưa cập nhật',
+          statusColor: recruiter['locked'] != null
+              ? (recruiter['locked'] ? Colors.red : Colors.green)
               : Colors.grey,
         ),
       ],
@@ -206,7 +229,7 @@ class _JobSeekerScreenState extends State<JobSeekerScreen> {
 
   List<Widget> _buildDialogActions(
     BuildContext context,
-    Map<String, dynamic> jobseeker,
+    Map<String, dynamic> recruiter,
     StateSetter setDialogState,
   ) {
     return [
@@ -214,20 +237,20 @@ class _JobSeekerScreenState extends State<JobSeekerScreen> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           ElevatedButton(
-            onPressed: jobseeker['isLoading'] == true
+            onPressed: recruiter['isLoading'] == true
                 ? null
                 : () => toggleLockStatus(
                       context: context,
-                      jobseeker: jobseeker,
+                      recruiter: recruiter,
                       setDialogState: setDialogState,
                     ),
             style: ElevatedButton.styleFrom(
               backgroundColor:
-                  jobseeker['locked'] == true ? Colors.green : Colors.red,
+                  recruiter['locked'] == true ? Colors.green : Colors.red,
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(5)),
             ),
-            child: jobseeker['isLoading'] == true
+            child: recruiter['isLoading'] == true
                 ? SizedBox(
                     width: 16,
                     height: 16,
@@ -235,7 +258,7 @@ class _JobSeekerScreenState extends State<JobSeekerScreen> {
                         color: Colors.white, strokeWidth: 2.0),
                   )
                 : Text(
-                    jobseeker['locked'] == true ? "Mở Khóa" : "Khóa",
+                    recruiter['locked'] == true ? "Mở Khóa" : "Khóa",
                     style: TextStyle(color: Colors.white),
                   ),
           ),
@@ -260,18 +283,18 @@ class _JobSeekerScreenState extends State<JobSeekerScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Quản lý ứng viên')),
+      appBar: AppBar(title: Text('Quản lý nhà tuyển dụng')),
       body: ListView.builder(
-        itemCount: jobseekerData.length,
+        itemCount: recruiterData.length,
         itemBuilder: (context, index) {
-          final user = jobseekerData[index];
-          return _buildjobseekerCard(context, user);
+          final user = recruiterData[index];
+          return _buildRecruiterCard(context, user);
         },
       ),
     );
   }
 
-  Widget _buildjobseekerCard(BuildContext context, Map<String, dynamic> user) {
+  Widget _buildRecruiterCard(BuildContext context, Map<String, dynamic> user) {
     return Card(
       margin: EdgeInsets.symmetric(vertical: 5, horizontal: 16),
       shape: RoundedRectangleBorder(
@@ -293,7 +316,7 @@ class _JobSeekerScreenState extends State<JobSeekerScreen> {
             ),
             SizedBox(height: 4),
             Text(
-              utf8.decode(user['fullName'].toString().runes.toList()),
+              utf8.decode(user['company']['name'].toString().runes.toList()),
               style: TextStyle(fontSize: 14, color: Colors.grey[600]),
               overflow: TextOverflow.ellipsis,
               maxLines: 1,

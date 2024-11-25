@@ -68,7 +68,7 @@ class _LoginScreenState extends State<LoginScreen> {
               child: Image.asset(
                 'assets/logo.jpg', // Đường dẫn đến file ảnh trong thư mục assets
                 height: 100, // Chiều cao logo
-                width: 100, // Chiều rộng logo (nếu cần)
+                width: 100, //
                 fit: BoxFit.cover, // Cách ảnh hiển thị
               ),
             ),

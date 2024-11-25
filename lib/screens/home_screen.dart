@@ -5,6 +5,7 @@ import 'login_screen.dart';
 import 'account_screen.dart';
 import 'change_password_screen.dart';
 import 'jobseeker_screen.dart';
+import 'recruiter_screen.dart';
 import '../widgets/common_snackbar.dart';
 
 var overviewData;
@@ -96,7 +97,45 @@ class _HomeScreenState extends State<HomeScreen> {
           context,
           MaterialPageRoute(
             builder: (context) =>
-                JobseekerScreen(jobseekerData: response['result']),
+                JobSeekerScreen(jobseekerData: response['result']),
+          ),
+        );
+      } catch (e) {
+        // Xử lý lỗi nếu có
+        print('Error fetching job seekers info: $e');
+        // Bạn có thể hiển thị thông báo lỗi tại đây nếu cần
+      } finally {
+        setState(() {
+          isLoading =
+              false; // Cập nhật lại trạng thái sau khi API đã trả về hoặc lỗi
+        });
+      }
+    } else {
+      // Nếu không có token
+      print('Token not found');
+    }
+  }
+
+  //Hàm gọi API lấy thông tin nhà tuyển dụng
+  Future<void> fetchRecruitersInfo() async {
+    final token = await storage.read(key: 'token'); // Lấy token từ storage
+
+    if (token != null) {
+      setState(() {
+        isLoading =
+            true; // Hiển thị CircularProgressIndicator trước khi gọi API
+      });
+
+      try {
+        // Gọi API lấy thông tin người dùng
+        final response = await ApiService.getRecruiters(token: token);
+
+        // Nếu thành công, chuyển sang trang JobseekerScreen
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) =>
+                RecruiterScreen(recruiterData: response['result']),
           ),
         );
       } catch (e) {
@@ -164,7 +203,7 @@ class _HomeScreenState extends State<HomeScreen> {
               MainAxisAlignment.center, // Căn giữa theo chiều dọc
           children: [
             ClipRRect(
-              borderRadius: BorderRadius.circular(30.0), // Bo góc logo
+              borderRadius: BorderRadius.circular(50.0), // Bo góc logo
               child: Image.asset(
                 'assets/logo.jpg', // Đường dẫn đến file ảnh trong thư mục assets
                 height: 100, // Chiều cao logo
@@ -338,12 +377,14 @@ class _HomeScreenState extends State<HomeScreen> {
                   icon: Icon(Icons.account_circle_outlined),
                   label: Text("Tài khoản"),
                   style: ElevatedButton.styleFrom(
+                    backgroundColor: Color(0xFF16a34a),
                     shape: RoundedRectangleBorder(
-                      borderRadius:
-                          BorderRadius.zero, // Bo tròn 0 để thành hình vuông
+                      borderRadius: BorderRadius.circular(7),
                     ),
                     padding: EdgeInsets.all(16),
-                    minimumSize: Size(180, 60), // Đặt kích thước cố định
+                    minimumSize: Size(180, 60),
+                    foregroundColor:
+                        Colors.white.withOpacity(0.9), // Đặt kích thước cố định
                   ),
                 ),
                 SizedBox(width: 16), // Khoảng cách giữa hai nút
@@ -358,11 +399,14 @@ class _HomeScreenState extends State<HomeScreen> {
                   icon: Icon(Icons.lock_outline), // Biểu tượng bên trái
                   label: Text("Đổi mật khẩu"), // Văn bản nút
                   style: ElevatedButton.styleFrom(
+                    backgroundColor: Color(0xFF16a34a),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.zero,
+                      borderRadius: BorderRadius.circular(7),
                     ),
                     padding: EdgeInsets.all(16),
-                    minimumSize: Size(180, 60), // Đặt kích thước cố định
+                    minimumSize: Size(180, 60),
+                    foregroundColor:
+                        Colors.white.withOpacity(0.9), // Đặt kích thước cố định
                   ),
                 ),
               ],
@@ -376,26 +420,30 @@ class _HomeScreenState extends State<HomeScreen> {
                   icon: Icon(Icons.account_box_outlined), // Biểu tượng bên trái
                   label: Text("Ứng viên"),
                   style: ElevatedButton.styleFrom(
+                    backgroundColor: Color(0xFF16a34a),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.zero,
+                      borderRadius: BorderRadius.circular(7),
                     ),
                     padding: EdgeInsets.all(16),
-                    minimumSize: Size(180, 60), // Đặt kích thước cố định
+                    minimumSize: Size(180, 60),
+                    foregroundColor:
+                        Colors.white.withOpacity(0.9), // Đặt kích thước cố định
                   ),
                 ),
                 SizedBox(width: 16), // Khoảng cách giữa hai nút
                 ElevatedButton.icon(
-                  onPressed: () {
-                    print("Nhà tuyển dụng button pressed");
-                  },
+                  onPressed: (fetchRecruitersInfo),
                   icon: Icon(Icons.apartment_rounded), // Biểu tượng bên trái
                   label: Text("Nhà tuyển dụng"),
                   style: ElevatedButton.styleFrom(
+                    backgroundColor: Color(0xFF16a34a),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.zero,
+                      borderRadius: BorderRadius.circular(7),
                     ),
                     padding: EdgeInsets.all(16),
-                    minimumSize: Size(180, 60), // Đặt kích thước cố định
+                    minimumSize: Size(180, 60),
+                    foregroundColor:
+                        Colors.white.withOpacity(0.9), // Đặt kích thước cố định
                   ),
                 ),
               ],
@@ -411,11 +459,14 @@ class _HomeScreenState extends State<HomeScreen> {
                   icon: Icon(Icons.menu_rounded), // Biểu tượng bên trái
                   label: Text("Bài đăng"),
                   style: ElevatedButton.styleFrom(
+                    backgroundColor: Color(0xFF16a34a),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.zero,
+                      borderRadius: BorderRadius.circular(7),
                     ),
                     padding: EdgeInsets.all(16),
-                    minimumSize: Size(180, 60), // Đặt kích thước cố định
+                    minimumSize: Size(180, 60),
+                    foregroundColor:
+                        Colors.white.withOpacity(0.9), // Đặt kích thước cố định
                   ),
                 ),
                 SizedBox(width: 16), // Khoảng cách giữa hai nút
@@ -427,12 +478,14 @@ class _HomeScreenState extends State<HomeScreen> {
                   icon: Icon(Icons.settings), // Biểu tượng bên trái
                   label: Text("Cài đặt"),
                   style: ElevatedButton.styleFrom(
+                    backgroundColor: Color(0xFF16a34a),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.zero,
+                      borderRadius: BorderRadius.circular(7),
                     ),
                     //padding: EdgeInsets.all(16),
                     padding: EdgeInsets.all(16),
                     minimumSize: Size(180, 60),
+                    foregroundColor: Colors.white.withOpacity(0.9),
                     // Đặt kích thước cố định
                   ),
                 ),
@@ -444,10 +497,12 @@ class _HomeScreenState extends State<HomeScreen> {
               icon: Icon(Icons.logout_rounded), // Biểu tượng bên trái
               label: Text("Đăng xuất"),
               style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.grey[400],
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.zero,
+                  borderRadius: BorderRadius.circular(7),
                 ),
                 minimumSize: Size(370, 60),
+                foregroundColor: Colors.black,
               ),
             ),
           ],
