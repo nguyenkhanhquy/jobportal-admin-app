@@ -16,6 +16,25 @@ class _LoginScreenState extends State<LoginScreen> {
   final FlutterSecureStorage storage = FlutterSecureStorage();
   bool _isPasswordVisible = false;
 
+  @override
+  void initState() {
+    super.initState();
+    checkToken(); // Kiểm tra token ngay khi khởi tạo
+  }
+
+  Future<void> checkToken() async {
+    final token = await storage.read(key: 'token'); // Đọc token từ storage
+
+    if (token != null && token.isNotEmpty) {
+      // Nếu token tồn tại, chuyển ngay sang HomeScreen
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => HomeScreen()),
+      );
+    }
+    // Nếu không có token, giữ nguyên LoginScreen
+  }
+
   Future<void> login() async {
     final response = await ApiService.login(
       email: emailController.text,

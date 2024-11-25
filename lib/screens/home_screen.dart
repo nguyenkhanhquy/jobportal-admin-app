@@ -15,7 +15,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final FlutterSecureStorage storage = FlutterSecureStorage();
-
+  bool isLoading = true;
   Future<void> logout() async {
     final token = await storage.read(key: "token");
 
@@ -70,8 +70,12 @@ class _HomeScreenState extends State<HomeScreen> {
         // Gọi API lấy thông tin người dùng
         final response = await ApiService.getOverview(token: token);
 
-        overviewData = response['result'];
-        print(overviewData['totalJobSeekers']);
+        setState(() {
+          overviewData = response['result'];
+          isLoading = false;
+        });
+
+        //print(overviewData['totalJobSeekers']);
       } catch (e) {
         // Xử lý lỗi nếu có
         print('Error fetching user info: $e');
@@ -85,19 +89,34 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    // Gọi fetchOverview ngay khi trang được khởi tạo
     fetchOverview();
   }
 
   @override
   Widget build(BuildContext context) {
+    if (isLoading) {
+      return Scaffold(
+        body: Center(
+            child: CircularProgressIndicator()), // Hiển thị spinner khi chờ
+      );
+    }
     return Scaffold(
-      appBar: AppBar(title: Text("Home")),
+      appBar: AppBar(),
       body: Center(
         child: Column(
           mainAxisAlignment:
               MainAxisAlignment.center, // Căn giữa theo chiều dọc
           children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(30.0), // Bo góc logo
+              child: Image.asset(
+                'assets/logo.jpg', // Đường dẫn đến file ảnh trong thư mục assets
+                height: 100, // Chiều cao logo
+                width: 100, // Chiều rộng logo (nếu cần)
+                fit: BoxFit.cover, // Cách ảnh hiển thị
+              ),
+            ),
+            SizedBox(height: 20),
             Padding(
               padding:
                   EdgeInsets.only(left: 30), // Thêm khoảng cách từ cạnh trái
@@ -237,6 +256,22 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ), // Khoảng cách giữa hai nút
               ],
+            ),
+            SizedBox(height: 16),
+            Padding(
+              padding:
+                  EdgeInsets.only(left: 30), // Thêm khoảng cách từ cạnh trái
+              child: Align(
+                alignment: Alignment.centerLeft, // Căn phần tử sang trái
+                child: Text(
+                  "Quản lý chung",
+                  //overviewData['totalJobSeekers'];
+                  style: TextStyle(
+                    fontSize: 26, // Tăng cỡ chữ
+                    //fontWeight: FontWeight.bold, // In đậm nếu cần
+                  ),
+                ),
+              ),
             ),
             SizedBox(height: 16),
             Row(
