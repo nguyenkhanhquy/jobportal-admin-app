@@ -6,6 +6,7 @@ import 'account_screen.dart';
 import 'change_password_screen.dart';
 import 'jobseeker_screen.dart';
 import 'recruiter_screen.dart';
+import 'post_screen.dart';
 import '../widgets/common_snackbar.dart';
 
 var overviewData;
@@ -66,6 +67,42 @@ class _HomeScreenState extends State<HomeScreen> {
       } catch (e) {
         // Xử lý lỗi nếu có
         print('Error fetching user info: $e');
+      } finally {
+        setState(() {
+          isLoading =
+              false; // Cập nhật lại trạng thái sau khi API đã trả về hoặc lỗi
+        });
+      }
+    } else {
+      // Nếu không có token
+      print('Token not found');
+    }
+  }
+
+  //Hàm gọi API để lấy thông tin bài đăng
+  Future<void> fetchJobPosts() async {
+    final token = await storage.read(key: 'token'); // Lấy token từ storage
+
+    if (token != null) {
+      setState(() {
+        isLoading =
+            true; // Hiển thị CircularProgressIndicator trước khi gọi API
+      });
+      try {
+        // Gọi API lấy thông tin người dùng
+        final response = await ApiService.getJobPost(token: token);
+
+        // Nếu thành công, chuyển sang trang AccountScreen
+        print('Hello, world!');
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => JobPostsScreen(jobPosts: response['result']),
+          ),
+        );
+      } catch (e) {
+        // Xử lý lỗi nếu có
+        print('Error fetching job posts info: $e');
       } finally {
         setState(() {
           isLoading =
@@ -453,9 +490,7 @@ class _HomeScreenState extends State<HomeScreen> {
               mainAxisAlignment: MainAxisAlignment.center, // Căn giữa hàng
               children: [
                 ElevatedButton.icon(
-                  onPressed: () {
-                    print("Danh sách bài đăng button pressed");
-                  },
+                  onPressed: (fetchJobPosts),
                   icon: Icon(Icons.menu_rounded), // Biểu tượng bên trái
                   label: Text("Bài đăng"),
                   style: ElevatedButton.styleFrom(

@@ -146,4 +146,35 @@ class ApiService {
 
     return jsonDecode(response.body);
   }
+
+  //Hàm đổi trạng thái khóa
+  static Future<Map<String, dynamic>> hiddenChange(
+      {required String id, required String token}) async {
+    final url = Uri.parse('$baseUrl/jobs/hidden');
+    final response = await http.post(
+      url,
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer $token"
+      },
+      body: jsonEncode({"id": id}),
+    );
+
+    return jsonDecode(response.body);
+  }
+
+  //Hàm đổi trạng thái khóa
+  static Future<Map<String, dynamic>> getJobPost(
+      {required String token}) async {
+    final url = Uri.parse('$baseUrl/jobs/admin');
+    final response = await http.get(
+      url,
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer $token"
+      },
+    );
+
+    return jsonDecode(response.body);
+  }
 }
