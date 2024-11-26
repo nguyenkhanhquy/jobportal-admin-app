@@ -70,8 +70,10 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
               // Mật khẩu hiện tại
               TextFormField(
                 controller: _currentPasswordController,
-                obscureText: true,
-                decoration: InputDecoration(labelText: 'Mật khẩu hiện tại'),
+                obscureText: false,
+                decoration: InputDecoration(
+                    labelText: 'Mật khẩu hiện tại',
+                    border: OutlineInputBorder()),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Vui lòng nhập mật khẩu hiện tại';
@@ -83,8 +85,9 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
               // Mật khẩu mới
               TextFormField(
                 controller: _newPasswordController,
-                obscureText: true,
-                decoration: InputDecoration(labelText: 'Mật khẩu mới'),
+                obscureText: false,
+                decoration: InputDecoration(
+                    labelText: 'Mật khẩu mới', border: OutlineInputBorder()),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Vui lòng nhập mật khẩu mới';
@@ -99,8 +102,10 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
               // Xác nhận mật khẩu mới
               TextFormField(
                 controller: _confirmPasswordController,
-                obscureText: true,
-                decoration: InputDecoration(labelText: 'Xác nhận mật khẩu'),
+                obscureText: false,
+                decoration: InputDecoration(
+                    labelText: 'Xác nhận mật khẩu',
+                    border: OutlineInputBorder()),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Vui lòng xác nhận mật khẩu';
@@ -114,7 +119,18 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
               SizedBox(height: 32),
               ElevatedButton(
                 onPressed: changePassword,
-                child: Text('Đổi mật khẩu'),
+                child: Text(
+                  'Đổi mật khẩu',
+                  style: TextStyle(color: Colors.white), // Màu chữ
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.green, // Màu nền
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(5), // Bo góc
+                  ),
+                  padding: EdgeInsets.symmetric(
+                      horizontal: 24, vertical: 12), // Padding
+                ),
               ),
             ],
           ),

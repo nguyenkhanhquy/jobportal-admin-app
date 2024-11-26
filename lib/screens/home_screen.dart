@@ -97,7 +97,8 @@ class _HomeScreenState extends State<HomeScreen> {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => JobPostsScreen(jobPosts: response['result']),
+            builder: (context) =>
+                JobPostScreen(jobpostData: response['result']),
           ),
         );
       } catch (e) {
@@ -507,38 +508,19 @@ class _HomeScreenState extends State<HomeScreen> {
                 SizedBox(width: 16), // Khoảng cách giữa hai nút
 
                 ElevatedButton.icon(
-                  onPressed: () {
-                    print("Cài đặt button pressed");
-                  },
-                  icon: Icon(Icons.settings), // Biểu tượng bên trái
-                  label: Text("Cài đặt"),
+                  onPressed: (logout),
+                  icon: Icon(Icons.logout_rounded), // Biểu tượng bên trái
+                  label: Text("Đăng xuất"),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Color(0xFF16a34a),
+                    backgroundColor: Colors.grey[400],
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(7),
                     ),
-                    //padding: EdgeInsets.all(16),
-                    padding: EdgeInsets.all(16),
                     minimumSize: Size(180, 60),
-                    foregroundColor: Colors.white.withOpacity(0.9),
-                    // Đặt kích thước cố định
+                    foregroundColor: Colors.black,
                   ),
                 ),
               ],
-            ),
-            SizedBox(height: 16),
-            ElevatedButton.icon(
-              onPressed: (logout),
-              icon: Icon(Icons.logout_rounded), // Biểu tượng bên trái
-              label: Text("Đăng xuất"),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.grey[400],
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(7),
-                ),
-                minimumSize: Size(370, 60),
-                foregroundColor: Colors.black,
-              ),
             ),
           ],
         ),

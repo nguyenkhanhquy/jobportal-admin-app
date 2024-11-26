@@ -1,393 +1,345 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:intl/intl.dart';
+import 'dart:convert';
 import '../services/api_service.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
-class JobPostsScreen extends StatefulWidget {
-  final List<dynamic>? jobPosts;
+class JobPostScreen extends StatefulWidget {
+  final List<dynamic> jobpostData;
 
-  JobPostsScreen({required this.jobPosts});
+  JobPostScreen({required this.jobpostData});
 
   @override
-  _JobPostsScreenState createState() => _JobPostsScreenState();
+  _JobPostScreenState createState() => _JobPostScreenState();
 }
 
-class _JobPostsScreenState extends State<JobPostsScreen> {
-  late List<dynamic> _jobPosts;
+class _JobPostScreenState extends State<JobPostScreen> {
+  late List<dynamic> jobpostData;
 
   @override
   void initState() {
     super.initState();
-    _jobPosts = widget.jobPosts ?? [];
+    jobpostData = widget.jobpostData;
+  }
+
+  Future<void> toggleHiddenStatus({
+    required BuildContext context,
+    required Map<String, dynamic> jobpost,
+    required Function setDialogState,
+  }) async {
+    final storage = FlutterSecureStorage();
+    String? token = await storage.read(key: 'token');
+
+    if (token == null) {
+      _showSnackBar(context, 'Không tìm thấy token! Vui lòng đăng nhập lại.',
+          isError: true);
+      return;
+    }
+
+    try {
+      setDialogState(() => jobpost['isLoading'] = true);
+      final response =
+          await ApiService.hiddenChange(id: jobpost['id'], token: token);
+
+      if (response['success'] == true) {
+        setState(() {
+          jobpost['hidden'] = !jobpost['hidden'];
+        });
+        _showSnackBar(
+          context,
+          jobpost['hidden'] ? 'Khóa thành công!' : 'Mở khóa thành công!',
+          isError: false,
+        );
+        Navigator.of(context).pop(); // Đóng dialog nếu cần
+      } else {
+        throw Exception(response['message'] ?? 'Đổi trạng thái thất bại!');
+      }
+    } catch (error) {
+      _showSnackBar(context, 'Lỗi: ${error.toString()}', isError: true);
+    } finally {
+      setDialogState(() => jobpost['isLoading'] = false);
+    }
+  }
+
+  void _showSnackBar(BuildContext context, String message,
+      {bool isError = false}) {
+    //String messagee = utf8.decode(message.runes.toList());
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: isError ? Colors.red : Colors.green,
+      ),
+    );
+  }
+
+  void _showDetailsDialog(BuildContext context, Map<String, dynamic> jobpost) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return StatefulBuilder(
+          builder: (BuildContext context, StateSetter setStateDialog) {
+            return AlertDialog(
+              title: Text("Thông tin chi tiết"),
+              content: SingleChildScrollView(
+                child: _buildDetailsContent(jobpost),
+              ),
+              actions: _buildDialogActions(context, jobpost, setStateDialog),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Widget _buildRichText(String label, String value, {Color? statusColor}) {
+    // Cung cấp giá trị mặc định nếu statusColor là null
+    final Color effectiveColor =
+        statusColor ?? Colors.black; // Mặc định là màu đen nếu không có giá trị
+
+    return RichText(
+      text: TextSpan(
+        children: [
+          TextSpan(
+            text: label + ": ",
+            style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black),
+          ),
+          TextSpan(
+            text: value,
+            style: TextStyle(color: effectiveColor),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildRichTextforCard(String label, String value,
+      {Color? statusColor}) {
+    // Cung cấp giá trị mặc định nếu statusColor là null
+    final Color effectiveColor =
+        statusColor ?? Colors.black; // Mặc định là màu đen nếu không có giá trị
+
+    return RichText(
+      text: TextSpan(
+        children: [
+          TextSpan(
+            text: label + ": ",
+            style: TextStyle(color: Colors.grey[600]),
+          ),
+          TextSpan(
+            text: value,
+            style:
+                TextStyle(fontWeight: FontWeight.bold, color: effectiveColor),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildRichTextWithSpacing(String label, String value,
+      {Color? statusColor}) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildRichText(label, value, statusColor: statusColor),
+        SizedBox(height: 8), // Khoảng cách giữa các mục
+      ],
+    );
+  }
+
+  Widget _buildDetailsContent(Map<String, dynamic> jobpost) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SizedBox(height: 8),
+        _buildRichTextWithSpacing(
+          'Tiêu đề',
+          utf8.decode(jobpost['title'].toString().runes.toList()),
+        ),
+        _buildRichTextWithSpacing(
+          'Tên công ty',
+          utf8.decode(jobpost['company']['name'].toString().runes.toList()),
+        ),
+        _buildRichTextWithSpacing('Vị trí tuyển dụng',
+            utf8.decode(jobpost['jobPosition'].toString().runes.toList())),
+        _buildRichTextWithSpacing(
+          'Mức lương',
+          utf8.decode(jobpost['salary'].toString().runes.toList()),
+        ),
+        _buildRichTextWithSpacing(
+          'Số lượng',
+          jobpost['quantity'].toString(),
+        ),
+        _buildRichTextWithSpacing(
+          'Loại hợp đồng',
+          utf8.decode(jobpost['type'].toString().runes.toList()),
+        ),
+        _buildRichTextWithSpacing('Địa điểm làm việc',
+            utf8.decode(jobpost['address'].toString().runes.toList())),
+        Divider(
+          color: Colors.grey, // Đặt màu cho đường kẻ
+          thickness: 1, // Độ dày của đường kẻ
+        ),
+        _buildRichTextWithSpacing('Mô tả công việc',
+            utf8.decode(jobpost['description'].toString().runes.toList())),
+        Divider(
+          color: Colors.grey, // Đặt màu cho đường kẻ
+          thickness: 1, // Độ dày của đường kẻ
+        ),
+        _buildRichTextWithSpacing('Yêu cầu',
+            utf8.decode(jobpost['requirements'].toString().runes.toList())),
+        Divider(
+          color: Colors.grey, // Đặt màu cho đường kẻ
+          thickness: 1, // Độ dày của đường kẻ
+        ),
+        _buildRichTextWithSpacing('Quyền lợi',
+            utf8.decode(jobpost['benefits'].toString().runes.toList())),
+        Divider(
+          color: Colors.grey, // Đặt màu cho đường kẻ
+          thickness: 1, // Độ dày của đường kẻ
+        ),
+        _buildRichTextWithSpacing('Ngày đăng',
+            utf8.decode(jobpost['createdDate'].toString().runes.toList())),
+        _buildRichTextWithSpacing('Thời hạn ứng tuyển',
+            utf8.decode(jobpost['expiryDate'].toString().runes.toList())),
+        // _buildRichTextWithSpacing(
+        //   'Trạng thái tài khoản: ',
+        //   jobpost['locked'] != null
+        //       ? (jobpost['locked'] ? 'Đã bị khóa' : 'Bình thường')
+        //       : 'Chưa cập nhật',
+        //   statusColor: jobpost['locked'] != null
+        //       ? (jobpost['locked'] ? Colors.red : Colors.green)
+        //       : Colors.grey,
+        // ),
+      ],
+    );
+  }
+
+  Widget _buildSectionTitle(String title) {
+    return Center(
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+            color: Colors.green[100], borderRadius: BorderRadius.circular(8)),
+        child: Padding(
+          padding: EdgeInsets.all(8),
+          child: Text(
+            title,
+            style: TextStyle(
+                fontWeight: FontWeight.bold, color: Colors.black, fontSize: 18),
+          ),
+        ),
+      ),
+    );
+  }
+
+  List<Widget> _buildDialogActions(
+    BuildContext context,
+    Map<String, dynamic> jobpost,
+    StateSetter setDialogState,
+  ) {
+    return [
+      Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          ElevatedButton(
+            onPressed: jobpost['isLoading'] == true
+                ? null
+                : () => toggleHiddenStatus(
+                      context: context,
+                      jobpost: jobpost,
+                      setDialogState: setDialogState,
+                    ),
+            style: ElevatedButton.styleFrom(
+              backgroundColor:
+                  jobpost['hidden'] == true ? Colors.green : Colors.grey,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(5)),
+            ),
+            child: jobpost['isLoading'] == true
+                ? SizedBox(
+                    width: 16,
+                    height: 16,
+                    child: CircularProgressIndicator(
+                        color: Colors.white, strokeWidth: 2.0),
+                  )
+                : Text(
+                    jobpost['hidden'] == true ? "Hiện" : "Ẩn",
+                    style: TextStyle(color: Colors.white),
+                  ),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            style: TextButton.styleFrom(
+              backgroundColor: Colors.grey[400], // Màu nền
+              foregroundColor: Colors.black, // Màu chữ
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8), // Bo góc nếu cần
+              ),
+              padding: EdgeInsets.symmetric(
+                  horizontal: 16, vertical: 10), // Padding nếu cần
+            ),
+            child: Text("Đóng"),
+          ),
+        ],
+      ),
+    ];
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text("Danh sách bài đăng"),
-      ),
-      body:
-          //? Center(child: CircularProgressIndicator())
-          ListView.builder(
-        itemCount: _jobPosts.length,
+      appBar: AppBar(title: Text('Quản lý bài đăng')),
+      body: ListView.builder(
+        itemCount: jobpostData.length,
         itemBuilder: (context, index) {
-          final jobPost = _jobPosts[index];
-          return Card(
-            margin: EdgeInsets.symmetric(horizontal: 16, vertical: 5),
-            elevation: 1,
-            child: Container(
-              decoration: BoxDecoration(
-                color: jobPost['hidden'] == false
-                    ? Colors.green[100]
-                    : Colors.grey[
-                        400], // Nền xanh khi hide == false, xám khi hide == true
-                border: Border.all(
-                  color: jobPost['hidden'] == false
-                      ? Colors.green
-                      : Colors
-                          .grey, // Viền xanh khi hide == false, xám khi hide == true
-                  width: 2, // Độ rộng viền
-                ),
-                borderRadius: BorderRadius.circular(8), // Bo tròn góc cho viền
-              ),
-              child: ListTile(
-                title: Text(
-                  utf8.decode(jobPost['title'].runes.toList()),
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-                subtitle: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    SizedBox(height: 4),
-                    // Label và Text cùng dòng - Công ty
-                    Row(
-                      children: [
-                        Text(
-                          "Công ty: ",
-                          style: TextStyle(
-                              fontWeight:
-                                  FontWeight.bold), // Tô đậm label "Công ty"
-                        ),
-                        Expanded(
-                          child: Text(
-                            utf8.decode(
-                                jobPost['company']['name'].runes.toList()),
-                            overflow:
-                                TextOverflow.ellipsis, // Đảm bảo không bị tràn
-                          ),
-                        ),
-                      ],
-                    ),
-                    // Label và Text cùng dòng - Vị trí
-                    Row(
-                      children: [
-                        Text(
-                          "Vị trí: ",
-                          style: TextStyle(
-                              fontWeight:
-                                  FontWeight.bold), // Tô đậm label "Vị trí"
-                        ),
-                        Expanded(
-                          child: Text(
-                            utf8.decode(jobPost['jobPosition'].runes.toList()),
-                            overflow:
-                                TextOverflow.ellipsis, // Đảm bảo không bị tràn
-                          ),
-                        ),
-                      ],
-                    ),
-                    // Label và Text cùng dòng - Ngày đăng
-                    Row(
-                      children: [
-                        Text(
-                          "Ngày đăng: ",
-                          style: TextStyle(
-                              fontWeight:
-                                  FontWeight.bold), // Tô đậm label "Ngày đăng"
-                        ),
-                        Expanded(
-                          child: Text(
-                            jobPost['createdDate'],
-                            overflow:
-                                TextOverflow.ellipsis, // Đảm bảo không bị tràn
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-                leading: Icon(Icons.work_outline, color: Colors.black),
-                trailing: Icon(Icons.arrow_forward_ios, size: 16),
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) =>
-                          JobPostDetailScreen(jobPost: jobPost),
-                    ),
-                  );
-                },
-              ),
-            ),
-          );
+          final job = jobpostData[index];
+          return _buildjobpostCard(context, job);
         },
       ),
     );
   }
-}
 
-class JobPostDetailScreen extends StatelessWidget {
-  final Map<String, dynamic> jobPost;
-
-  JobPostDetailScreen({required this.jobPost});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-        appBar: AppBar(
-          title: Text('Chi tiết bài đăng'),
-        ),
-        body: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween, // Căn giữa
-                  children: [
-                    Expanded(
-                      // Đảm bảo Text không bị tràn
-                      child: Text(
-                        utf8.decode(jobPost['title'].runes.toList()),
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xFF046A38), // Màu xanh cho title
-                        ),
-                        softWrap: true,
-                        overflow: TextOverflow.visible,
-                      ),
-                    ),
-                    SizedBox(width: 10),
-                    // Nút ẩn/hiện
-                    ElevatedButton(
-                      onPressed: () {
-                        // Thực hiện hành động khi nhấn nút
-                        // Ví dụ: thực hiện hành động ẩn/hiện bài đăng
-                      },
-                      style: ElevatedButton.styleFrom(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(
-                              5), // Bo góc với bán kính là 5
-                        ),
-                        backgroundColor: jobPost['hidden']
-                            ? Colors.green
-                            : Colors.black.withOpacity(0.5), // Màu nền nút
-                      ),
-                      child: Text(
-                        jobPost['hidden'] ? 'HIỆN' : 'ẨN', // Chữ trên nút
-                        style: TextStyle(
-                          color: Colors.white, // Màu chữ nút
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                SizedBox(height: 8),
-                Text(
-                  "Công ty: ${utf8.decode(jobPost['company']['name'].runes.toList())}",
-                  style: TextStyle(
-                    color: Colors.grey,
-                  ),
-                ),
-                SizedBox(height: 8),
-                Divider(
-                  color: Colors.grey, // Đặt màu cho đường kẻ
-                  thickness: 1, // Độ dày của đường kẻ
-                ),
-                SizedBox(height: 8),
-                Row(
-                  children: [
-                    Text(
-                      "Vị trí tuyển dụng: ",
-                      style: TextStyle(
-                          fontWeight:
-                              FontWeight.bold), // Tô đậm label "Ngày đăng"
-                    ),
-                    Expanded(
-                      child: Text(
-                        utf8.decode(jobPost['jobPosition'].runes.toList()),
-                        overflow:
-                            TextOverflow.ellipsis, // Đảm bảo không bị tràn
-                      ),
-                    ),
-                  ],
-                ),
-                SizedBox(height: 8),
-                Row(
-                  children: [
-                    Text(
-                      "Mức lương: ",
-                      style: TextStyle(
-                          fontWeight:
-                              FontWeight.bold), // Tô đậm label "Ngày đăng"
-                    ),
-                    Expanded(
-                      child: Text(
-                        utf8.decode(jobPost['salary'].runes.toList()),
-                        overflow:
-                            TextOverflow.ellipsis, // Đảm bảo không bị tràn
-                      ),
-                    ),
-                  ],
-                ),
-                SizedBox(height: 8),
-                Row(
-                  children: [
-                    Text(
-                      "Số lượng tuyển dụng: ",
-                      style: TextStyle(
-                          fontWeight:
-                              FontWeight.bold), // Tô đậm label "Ngày đăng"
-                    ),
-                    Expanded(
-                      child: Text(
-                        NumberFormat('#,###').format(jobPost['quantity']),
-                        overflow:
-                            TextOverflow.ellipsis, // Đảm bảo không bị tràn
-                      ),
-                    ),
-                  ],
-                ),
-                SizedBox(height: 8),
-                Row(
-                  children: [
-                    Text(
-                      "Loại hợp đồng: ",
-                      style: TextStyle(
-                          fontWeight:
-                              FontWeight.bold), // Tô đậm label "Ngày đăng"
-                    ),
-                    Expanded(
-                      child: Text(
-                        utf8.decode(jobPost['type'].runes.toList()),
-                        overflow:
-                            TextOverflow.ellipsis, // Đảm bảo không bị tràn
-                      ),
-                    ),
-                  ],
-                ),
-                SizedBox(height: 8),
-                Row(
-                  children: [
-                    Text(
-                      "Hình thức làm việc: ",
-                      style: TextStyle(
-                          fontWeight:
-                              FontWeight.bold), // Tô đậm label "Ngày đăng"
-                    ),
-                    Expanded(
-                      child: Text(
-                        utf8.decode(jobPost['remote'].runes.toList()),
-                        overflow:
-                            TextOverflow.ellipsis, // Đảm bảo không bị tràn
-                      ),
-                    ),
-                  ],
-                ),
-                SizedBox(height: 8),
-                Text(
-                  "Địa chỉ làm việc: ",
-                  style: TextStyle(
-                      fontWeight: FontWeight.bold), // Tô đậm label "Ngày đăng"
-                ),
-                Text(
-                  utf8.decode(jobPost['address'].runes.toList()),
-                  //overflow: TextOverflow.ellipsis, // Đảm bảo không bị tràn
-                ),
-                SizedBox(height: 8),
-                Divider(
-                  color: Colors.grey, // Đặt màu cho đường kẻ
-                  thickness: 1, // Độ dày của đường kẻ
-                ),
-                SizedBox(height: 8),
-                Text(
-                  "Mô tả công việc: ",
-                  style: TextStyle(
-                      fontWeight: FontWeight.bold), // Tô đậm label "Ngày đăng"
-                ),
-                Text(
-                  utf8.decode(jobPost['description'].runes.toList()),
-                  //overflow: TextOverflow.ellipsis, // Đảm bảo không bị tràn
-                ),
-                SizedBox(height: 20),
-                Text(
-                  "Yêu cầu ứng viên: ",
-                  style: TextStyle(
-                      fontWeight: FontWeight.bold), // Tô đậm label "Ngày đăng"
-                ),
-                Text(
-                  utf8.decode(jobPost['requirements'].runes.toList()),
-                  //overflow: TextOverflow.ellipsis, // Đảm bảo không bị tràn
-                ),
-                SizedBox(height: 20),
-                Text(
-                  "Quyền lợi: ",
-                  style: TextStyle(
-                      fontWeight: FontWeight.bold), // Tô đậm label "Ngày đăng"
-                ),
-                Text(
-                  utf8.decode(jobPost['benefits'].runes.toList()),
-                  //overflow: TextOverflow.ellipsis, // Đảm bảo không bị tràn
-                ),
-                SizedBox(height: 8),
-                Divider(
-                  color: Colors.grey, // Đặt màu cho đường kẻ
-                  thickness: 1, // Độ dày của đường kẻ
-                ),
-                SizedBox(height: 8),
-                Row(
-                  children: [
-                    Text(
-                      "Ngày đăng: ",
-                      style: TextStyle(
-                          fontWeight:
-                              FontWeight.bold), // Tô đậm label "Ngày đăng"
-                    ),
-                    Expanded(
-                      child: Text(
-                        utf8.decode(jobPost['createdDate'].runes.toList()),
-                        overflow:
-                            TextOverflow.ellipsis, // Đảm bảo không bị tràn
-                      ),
-                    ),
-                  ],
-                ),
-                SizedBox(height: 8),
-                Row(
-                  children: [
-                    Text(
-                      "Thời hạn ứng tuyển: ",
-                      style: TextStyle(
-                          fontWeight:
-                              FontWeight.bold), // Tô đậm label "Ngày đăng"
-                    ),
-                    Expanded(
-                      child: Text(
-                        utf8.decode(jobPost['expiryDate'].runes.toList()),
-                        overflow:
-                            TextOverflow.ellipsis, // Đảm bảo không bị tràn
-                      ),
-                    ),
-                  ],
-                ),
-              ],
+  Widget _buildjobpostCard(BuildContext context, Map<String, dynamic> job) {
+    return Card(
+      margin: EdgeInsets.symmetric(vertical: 5, horizontal: 16),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(10),
+        side: BorderSide(
+            color: job['hidden'] ? Colors.grey : Colors.green, width: 1),
+      ),
+      elevation: 2,
+      color: job['hidden'] ? Colors.grey[500] : Colors.green[100],
+      child: ListTile(
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              utf8.decode(job['title'].toString().runes.toList()),
+              style: TextStyle(fontSize: 18),
+              overflow: TextOverflow.ellipsis,
+              maxLines: 1,
             ),
-          ),
-        ));
+            SizedBox(height: 4),
+            Text(
+              utf8.decode(job['company']['name'].toString().runes.toList()),
+              style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+              overflow: TextOverflow.ellipsis,
+              maxLines: 1,
+            ),
+            SizedBox(height: 4),
+            _buildRichTextforCard(
+              'Trạng thái',
+              job['hidden'] ? 'Đã ẩn' : 'Đang hiển thị',
+              statusColor: job['hidden'] ? Colors.black : Color(0xFF006E33),
+            ),
+          ],
+        ),
+        onTap: () => _showDetailsDialog(context, job),
+        trailing: Icon(
+          job['hidden'] ? Icons.visibility_off : Icons.visibility,
+          color: job['hidden'] ? Colors.black : Colors.green,
+          size: 30,
+        ),
+      ),
+    );
   }
 }
