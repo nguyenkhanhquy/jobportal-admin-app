@@ -32,156 +32,164 @@ class AccountScreen extends StatelessWidget {
               ),
             ),
             SizedBox(height: 20),
-            Padding(
-              padding: EdgeInsets.only(left: 20.0), // Thêm khoảng cách bên trái
-              child: RichText(
-                text: TextSpan(
-                  children: [
-                    TextSpan(
-                      text: 'ID: ', // Phần in đậm
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold, // In đậm
-                        color: Colors.black, // Màu chữ
-                      ),
-                    ),
-                    TextSpan(
-                      text: '   ', // Khoảng cách (chuỗi khoảng trắng)
-                      //style: TextStyle(fontSize: 18), // Kiểu chữ cho khoảng trắng
-                    ),
-                    TextSpan(
-                      text: '${userData['id']}', // Phần giữ nguyên
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.normal, // Không in đậm
-                        color: Colors.black, // Màu chữ
-                      ),
-                    ),
-                  ],
-                ),
+            Container(
+              margin: EdgeInsets.all(20.0), // Khoảng cách ngoài khung
+              padding: EdgeInsets.all(15.0), // Khoảng cách bên trong khung
+              decoration: BoxDecoration(
+                color: Colors.white, // Màu nền của khung
+                borderRadius: BorderRadius.circular(10.0), // Bo góc khung
+                border:
+                    Border.all(color: Colors.grey, width: 1.0), // Viền khung
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.grey.withOpacity(0.5), // Màu bóng đổ
+                    spreadRadius: 2, // Độ lan của bóng
+                    blurRadius: 5, // Độ mờ của bóng
+                    offset: Offset(0, 3), // Vị trí bóng (x, y)
+                  ),
+                ],
               ),
-            ),
-            SizedBox(height: 20),
-            Padding(
-              padding: EdgeInsets.only(left: 20.0), // Thêm khoảng cách bên trái
-              child: RichText(
-                text: TextSpan(
-                  children: [
-                    TextSpan(
-                      text: 'Email: ', // Phần in đậm
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold, // In đậm
-                        color: Colors.black, // Màu chữ
+              child: Column(
+                crossAxisAlignment:
+                    CrossAxisAlignment.start, // Căn nội dung về bên trái
+                children: [
+                  Padding(
+                    padding: EdgeInsets.only(
+                        left: 20.0,
+                        right: 20.0,
+                        top: 5.0), // Thêm khoảng cách bên trái
+                    child: RichText(
+                      text: TextSpan(
+                        children: [
+                          TextSpan(
+                            text: 'ID: ',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black,
+                            ),
+                          ),
+                          TextSpan(
+                            text: '${userData['id']}',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.normal,
+                              color: Colors.black,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                    TextSpan(
-                      text: '   ', // Khoảng cách (chuỗi khoảng trắng)
-                      //style: TextStyle(fontSize: 18), // Kiểu chữ cho khoảng trắng
-                    ),
-                    TextSpan(
-                      text: '${userData['email']}', // Phần giữ nguyên
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.normal, // Không in đậm
-                        color: Colors.black, // Màu chữ
+                  ),
+                  SizedBox(height: 20),
+                  Padding(
+                    padding: EdgeInsets.only(left: 20.0),
+                    child: RichText(
+                      text: TextSpan(
+                        children: [
+                          TextSpan(
+                            text: 'Email: ',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black,
+                            ),
+                          ),
+                          TextSpan(
+                            text: '${userData['email']}',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.normal,
+                              color: Colors.black,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                  ],
-                ),
-              ),
-            ),
-            SizedBox(height: 20),
-            Padding(
-              padding: EdgeInsets.only(left: 20.0), // Thêm khoảng cách bên trái
-              child: RichText(
-                text: TextSpan(
-                  children: [
-                    TextSpan(
-                      text: 'Ngày đăng ký: ', // Phần in đậm
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold, // In đậm
-                        color: Colors.black, // Màu chữ
+                  ),
+                  SizedBox(height: 20),
+                  Padding(
+                    padding: EdgeInsets.only(left: 20.0),
+                    child: RichText(
+                      text: TextSpan(
+                        children: [
+                          TextSpan(
+                            text: 'Ngày tạo: ',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black,
+                            ),
+                          ),
+                          TextSpan(
+                            text: formatDate(userData['registrationDate']),
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.normal,
+                              color: Colors.black,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                    TextSpan(
-                      text: '   ', // Khoảng cách (chuỗi khoảng trắng)
-                      //style: TextStyle(fontSize: 18), // Kiểu chữ cho khoảng trắng
-                    ),
-                    TextSpan(
-                      text: formatDate(userData['registrationDate']),
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.normal, // Không in đậm
-                        color: Colors.black, // Màu chữ
+                  ),
+                  SizedBox(height: 20),
+                  Padding(
+                    padding: EdgeInsets.only(left: 20.0),
+                    child: RichText(
+                      text: TextSpan(
+                        children: [
+                          TextSpan(
+                            text: 'Vai trò: ',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black,
+                            ),
+                          ),
+                          TextSpan(
+                            text: '${userData['role']}',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.normal,
+                              color: Colors.black,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                  ],
-                ),
-              ),
-            ),
-            SizedBox(height: 20),
-            Padding(
-              padding: EdgeInsets.only(left: 20.0), // Thêm khoảng cách bên trái
-              child: RichText(
-                text: TextSpan(
-                  children: [
-                    TextSpan(
-                      text: 'Vai trò: ', // Phần in đậm
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold, // In đậm
-                        color: Colors.black, // Màu chữ
+                  ),
+                  SizedBox(height: 20),
+                  Padding(
+                    padding: EdgeInsets.only(left: 20.0),
+                    child: RichText(
+                      text: TextSpan(
+                        children: [
+                          TextSpan(
+                            text: 'Trạng thái hoạt động: ',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black,
+                            ),
+                          ),
+                          TextSpan(
+                            text: userData['active']
+                                ? 'Hoạt động'
+                                : 'Không hoạt động',
+                            style: TextStyle(
+                              fontSize: 18,
+                              color: userData['active']
+                                  ? Colors.green
+                                  : Colors.red,
+                              fontWeight: FontWeight.normal,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                    TextSpan(
-                      text: '   ', // Khoảng cách (chuỗi khoảng trắng)
-                      //style: TextStyle(fontSize: 18), // Kiểu chữ cho khoảng trắng
-                    ),
-                    TextSpan(
-                      text: '${userData['role']}', // Phần giữ nguyên
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.normal, // Không in đậm
-                        color: Colors.black, // Màu chữ
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            SizedBox(height: 20),
-            Padding(
-              padding: EdgeInsets.only(left: 20.0), // Thêm khoảng cách bên trái
-              child: RichText(
-                text: TextSpan(
-                  children: [
-                    TextSpan(
-                      text: 'Trạng thái hoạt động: ', // Phần in đậm
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold, // In đậm
-                        color: Colors.black, // Màu chữ
-                      ),
-                    ),
-                    TextSpan(
-                      text: '   ', // Khoảng cách (chuỗi khoảng trắng)
-                      //style: TextStyle(fontSize: 18), // Kiểu chữ cho khoảng trắng
-                    ),
-                    TextSpan(
-                      text: userData['active']
-                          ? 'Hoạt động'
-                          : 'Không hoạt động', // Phần giữ nguyên
-                      style: TextStyle(
-                        fontSize: 18,
-                        color: userData['active'] ? Colors.green : Colors.red,
-                        fontWeight: FontWeight.normal, // Không in đậm
-                        // color: Colors.black, // Màu chữ
-                      ),
-                    ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
           ],

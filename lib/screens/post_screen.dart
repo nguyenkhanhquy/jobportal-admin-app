@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'dart:convert';
 import '../services/api_service.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -47,7 +46,7 @@ class _JobPostScreenState extends State<JobPostScreen> {
         });
         _showSnackBar(
           context,
-          jobpost['hidden'] ? 'Khóa thành công!' : 'Mở khóa thành công!',
+          jobpost['hidden'] ? 'Ẩn thành công!' : 'Hiện thành công!',
           isError: false,
         );
         Navigator.of(context).pop(); // Đóng dialog nếu cần

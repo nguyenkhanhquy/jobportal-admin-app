@@ -413,7 +413,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ElevatedButton.icon(
                   onPressed: (fetchUserInfo),
                   icon: Icon(Icons.account_circle_outlined),
-                  label: Text("Tài khoản"),
+                  label: Text("Thông tin"),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Color(0xFF16a34a),
                     shape: RoundedRectangleBorder(

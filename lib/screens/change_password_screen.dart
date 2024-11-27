@@ -35,7 +35,9 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
 
           if (response['success']) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Đổi mật khẩu thành công')),
+              SnackBar(
+                  content: Text('Đổi mật khẩu thành công'),
+                  backgroundColor: Colors.green),
             );
             Navigator.pop(context); // Quay lại màn hình trước
           } else {

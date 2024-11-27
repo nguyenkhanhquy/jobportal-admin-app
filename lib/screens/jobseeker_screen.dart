@@ -134,12 +134,14 @@ class _JobSeekerScreenState extends State<JobSeekerScreen> {
     );
   }
 
-  Widget _buildRichTextWithSpacing(String label, String value,
+  Widget _buildRichTextWithSpacing(String label, String? value,
       {Color? statusColor}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildRichText(label, value, statusColor: statusColor),
+        _buildRichText(
+            label, (value == null || value == 'null') ? "Chưa cập nhật" : value,
+            statusColor: statusColor),
         SizedBox(height: 8), // Khoảng cách giữa các mục
       ],
     );
@@ -151,31 +153,31 @@ class _JobSeekerScreenState extends State<JobSeekerScreen> {
       children: [
         SizedBox(height: 8),
         _buildRichTextWithSpacing(
-          'ID: ',
+          'ID',
           jobseeker['id'],
         ),
         _buildRichTextWithSpacing(
-          'Email: ',
+          'Email',
           jobseeker['email'],
         ),
-        _buildRichTextWithSpacing('Họ và tên: ',
+        _buildRichTextWithSpacing('Họ và tên',
             utf8.decode(jobseeker['fullName'].toString().runes.toList())),
         _buildRichTextWithSpacing(
-            'Ngày đăng ký: ', jobseeker['registrationDate']),
+            'Ngày đăng ký', jobseeker['registrationDate']),
         _buildRichTextWithSpacing(
-          'Ngày sinh: ',
+          'Ngày sinh',
           jobseeker['registrationDate'],
         ),
         _buildRichTextWithSpacing(
-          'Số điện thoại: ',
+          'Số điện thoại',
           jobseeker['phone'],
         ),
-        _buildRichTextWithSpacing('Địa chỉ: ',
+        _buildRichTextWithSpacing('Địa chỉ',
             utf8.decode(jobseeker['address'].toString().runes.toList())),
-        _buildRichTextWithSpacing('Kinh nghiệm: ',
+        _buildRichTextWithSpacing('Kinh nghiệm',
             utf8.decode(jobseeker['workExperience'].toString().runes.toList())),
         _buildRichTextWithSpacing(
-          'Trạng thái tài khoản: ',
+          'Trạng thái tài khoản',
           jobseeker['locked'] != null
               ? (jobseeker['locked'] ? 'Đã bị khóa' : 'Bình thường')
               : 'Chưa cập nhật',
